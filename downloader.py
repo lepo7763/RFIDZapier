@@ -25,7 +25,7 @@ def retrieveUPC(url):
     UPCValues = []
 
     for row in reader:
-        if len(row) > UPCColumn: # check if there are enough columns to get to UPCColumn
+        if len(row) > UPCColumn and row[UPCColumn].strip(): # check if there are enough columns to get to UPCColumn
             UPCValues.append(row[UPCColumn]) # append any upc values to UPCValues
             # print(row[UPCColumn])         <- test
 

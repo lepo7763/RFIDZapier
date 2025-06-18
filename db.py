@@ -14,7 +14,6 @@ password = os.getenv("MYSQL_PASSWORD")
 database = os.getenv("MYSQL_DATABASE")
 
 def getExclusionRows(start, end):
-    # move this stuff to a .env file maybe?
     conn = mysql.connector.connect(
         host = host,
         user = user,
@@ -62,3 +61,15 @@ def getLatestSubmissionNumber():
     conn.close()
 
     return maxNumber
+
+def loadLastSeen():
+    try: 
+        with open("last_seen.txt", "r") as f:
+            return int(f.read().strip())
+        
+    except FileNotFoundError:
+        return 0
+    
+def saveLastSeen(number):
+    with open("last_seen.txt", "w") as f:
+        f.write(str(number))
