@@ -1,8 +1,7 @@
 from db import getExclusionRows, insertUPCToSQL, getLatestSubmissionNumber, loadLastSeen, saveLastSeen
 from parser import isValidCSV
 from downloader import retrieveUPC
-import csv
-import datetime
+import csv, datetime
 
 # add a method to export a csv after each run, printing all of the rows that were erroneous
 # make the csv only export failed itemFiles
@@ -26,24 +25,32 @@ def main():
 
         rows = getExclusionRows(startIndex, maxIndex) 
 
-        for row in rows:
-            submissionID, submissionNumber, itemFile = row
-            if isValidCSV(itemFile):
-                print(f"({submissionNumber}) Submission ID [{submissionID}] has a valid CSV") # validates csv file to be downloadable
+        for submissionID, submissionNumber, itemFile in rows:
+            if not isValidCSV(itemFile):
+                writer.writerow([submissionNumber, submissionID, "Bad URL"])
+                saveLastSeen(submissionNumber + 1) # if script crashes, this saves where it left off. 
+                continue
+
+            print(f"({submissionNumber}) Submission ID [{submissionID}] has a valid CSV") # validates csv file to be downloadable
                 
-                try:
-                    UPCs = retrieveUPC(itemFile) # add retrieveUPC function here? to write the submissionID with the scraped UPC to the exclusion_UPC table
+            try:
+                UPCs, badUPCs = retrieveUPC(itemFile) 
+                if UPCs:
                     for value in UPCs:
-                        print(f"Found {value}") # delete
+                        print(f"Found UPC: {value}")
                         # insertUPCToSQL(submissionID, value)
-                        # ^^ uncomment later
-                except Exception as e:
-                    print(f"Failed to print {submissionNumber} with ID [{submissionID}]: {e}")
+
+                if badUPCs and not UPCs:
+                    print(f"({submissionNumber}) all UPCs are invalid")
+                    writer.writerow([submissionNumber, submissionID, "All UPCs invalid"])
+
+                elif not UPCs and not badUPCs:
+                    print(f"({submissionNumber}) missing UPC column entirely")
+                    writer.writerow([submissionNumber, submissionID, "Missing UPC column"])
+
+            except Exception as e:
+                print(f"Failed to print {submissionNumber} with ID [{submissionID}]: {e}")
         
-            else:
-                print(f"({submissionNumber}) Submission ID [{submissionID}] produced an error with its item file")
-                writer.writerow([submissionNumber, submissionID, itemFile]) # write to csv file
-                
             saveLastSeen(submissionNumber + 1) # if script crashes, this saves where it left off. 
 
 if __name__ == "__main__":

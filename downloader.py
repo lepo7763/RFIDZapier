@@ -1,6 +1,5 @@
-import csv
-import requests
-import io
+import csv, io, requests, re
+
 # retrieve the UPC
 # download the csv file
 # when writing to the "excluded_upc" table, insert submission ID and the UPC value 
@@ -10,23 +9,32 @@ def retrieveUPC(url):
 
     if response.status_code != 200:
         print(response.status_code)
-        return []
+        return [], []
     
-    fileStream = io.StringIO(response.text, newline='')
-    reader = csv.reader(fileStream)
-    header = next(reader)
-
+    reader = csv.reader(io.StringIO(response.text, newline=""))
+    header = next(reader, [])
+    
     try:  
         UPCColumn = header.index("UPC") # get column location of UPC value
     except ValueError:
         print("UPC column not present")
-        return []
+        return [], []
     
-    UPCValues = []
+    UPCValues, badUPCs = [], []
 
     for row in reader:
-        if len(row) > UPCColumn and row[UPCColumn].strip(): # check if there are enough columns to get to UPCColumn
-            UPCValues.append(row[UPCColumn]) # append any upc values to UPCValues
-            # print(row[UPCColumn])         <- test
+        rawValue = str(row[UPCColumn]).strip()
 
-    return UPCValues
+        if "e" in rawValue.lower():
+            badUPCs.append(rawValue)
+            print(f"Skipped invalid UPC: {rawValue}")
+            continue
+
+        cleanedValue = re.sub(r"[^0-9]", "", rawValue)
+
+        if cleanedValue:
+            UPCValues.append(cleanedValue)
+        else:
+            badUPCs.append(rawValue)    
+
+    return UPCValues, badUPCs
