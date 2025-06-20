@@ -12,7 +12,7 @@ def retrieveUPC(url):
         print(response.status_code)
         return []
     
-    fileStream = io.StringIO(response.text)
+    fileStream = io.StringIO(response.text, newline='')
     reader = csv.reader(fileStream)
     header = next(reader)
 
