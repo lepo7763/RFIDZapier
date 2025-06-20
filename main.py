@@ -21,13 +21,14 @@ def main():
 
     with open(f"Unsuccessful Rows/{formatDate}.csv", "w", newline='') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(["Submission Number", "Submission ID", "itemFile"])
+        writer.writerow(["Submission Number", "Submission ID", "itemFile", "Error"])
 
         rows = getExclusionRows(startIndex, maxIndex) 
 
         for submissionID, submissionNumber, itemFile in rows:
             if not isValidCSV(itemFile):
-                writer.writerow([submissionNumber, submissionID, "Bad URL"])
+                print(f"({submissionNumber}) has a bad URL")
+                writer.writerow([submissionNumber, submissionID, itemFile, "Bad URL"])
                 saveLastSeen(submissionNumber + 1) # if script crashes, this saves where it left off. 
                 continue
 
@@ -42,11 +43,11 @@ def main():
 
                 if badUPCs and not UPCs:
                     print(f"({submissionNumber}) all UPCs are invalid")
-                    writer.writerow([submissionNumber, submissionID, "All UPCs invalid"])
+                    writer.writerow([submissionNumber, submissionID, itemFile, "All UPCs invalid"])
 
                 elif not UPCs and not badUPCs:
                     print(f"({submissionNumber}) missing UPC column entirely")
-                    writer.writerow([submissionNumber, submissionID, "Missing UPC column"])
+                    writer.writerow([submissionNumber, submissionID, itemFile, "Missing UPC column"])
 
             except Exception as e:
                 print(f"Failed to print {submissionNumber} with ID [{submissionID}]: {e}")
