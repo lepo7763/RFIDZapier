@@ -1,12 +1,8 @@
 from db import getExclusionRows, insertUPCToSQL, getLatestSubmissionNumber, loadLastSeen, saveLastSeen
 from parser import isValidCSV
 from downloader import retrieveUPC
+from daemonRunner import runDaemon
 import csv, datetime
-
-# add a method to export a csv after each run, printing all of the rows that were erroneous
-# make the csv only export failed itemFiles
-
-# then run for the entire table and look for errors in terminal + exported csv
 
 def main():
     startIndex = loadLastSeen()
@@ -55,4 +51,4 @@ def main():
             saveLastSeen(submissionNumber + 1) # if script crashes, this saves where it left off. 
 
 if __name__ == "__main__":
-    main()
+    runDaemon()

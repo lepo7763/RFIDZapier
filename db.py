@@ -2,10 +2,6 @@ import mysql.connector
 import os
 from dotenv import load_dotenv
 
-# add a way to filter amount of rows extracted and after what row it should start from
-# must be updating after each iteration
-#
-
 load_dotenv()
 
 host = os.getenv("MYSQL_HOST")
@@ -26,14 +22,11 @@ def getExclusionRows(start, end):
                    FROM exclusion 
                    WHERE submission_number 
                    BETWEEN %s AND %s""", (start, end)) 
-    # maybe change this to just start and to the (unspecified) end later when it runs autonomously on a server?
     rows = cursor.fetchall()
 
     conn.close()
     return rows
 
-#function to write specific data into the exclusion table
-#def somethingsomething():
 def insertUPCToSQL(submissionID, UPC):
     conn = mysql.connector.connect(
         host = host,

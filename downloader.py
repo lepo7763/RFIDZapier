@@ -2,7 +2,6 @@ import csv, io, requests, re
 
 # retrieve the UPC
 # download the csv file
-# when writing to the "excluded_upc" table, insert submission ID and the UPC value 
 
 def retrieveUPC(url):
     response = requests.get(url, timeout=10)
