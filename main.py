@@ -1,30 +1,30 @@
-from db import getExclusionRows, insertUPCToSQL, getLatestSubmissionNumber, loadLastSeen, saveLastSeen
-from parser import isValidCSV
+from db import getExclusionRows, insertExcludedUPCToSQL, getLatestExclusionSubmissionNumber, exclusionLoadLastSeen, exclusionSaveLastSeen
+from parser import isValidExclusionCSV
 from downloader import retrieveUPC
 import csv, datetime
 
 def main():
-    startIndex = loadLastSeen()
-    maxIndex = getLatestSubmissionNumber()
+    startIndex = exclusionLoadLastSeen()
+    maxIndex = getLatestExclusionSubmissionNumber()
 
     if startIndex > maxIndex: # check for new rows
-        print("No new rows to process.")
+        print("No new rows to process for exclusions.")
         return
     
     currentDate = datetime.datetime.now() # get current date and time
     formatDate = currentDate.strftime("%Y-%m-%d %H-%M-%S")
 
-    with open(f"Unsuccessful Rows/{formatDate}.csv", "w", newline='') as csvfile: # write unsuccessful rows to a CSV file
+    with open(f"Unsuccessful Exclusion Rows/{formatDate}.csv", "w", newline='') as csvfile: # write unsuccessful rows to a CSV file
         writer = csv.writer(csvfile)
         writer.writerow(["Submission Number", "Submission ID", "itemFile", "Error"])
 
         rows = getExclusionRows(startIndex, maxIndex) 
 
         for submissionID, submissionNumber, itemFile in rows:
-            if not isValidCSV(itemFile):
+            if not isValidExclusionCSV(itemFile):
                 print(f"({submissionNumber}) has a bad URL")
                 writer.writerow([submissionNumber, submissionID, itemFile, "Bad URL"])
-                saveLastSeen(submissionNumber + 1) # if script crashes, this saves where it left off. 
+                exclusionSaveLastSeen(submissionNumber + 1) # if script crashes, this saves where it left off. 
                 continue
 
             print(f"({submissionNumber}) Submission ID [{submissionID}] has a valid CSV") # validates csv file to be downloadable
@@ -34,7 +34,7 @@ def main():
                 if UPCs:
                     for value in UPCs:
                         print(f"Found UPC: {value}")
-                        # insertUPCToSQL(submissionID, value)
+                        # insertExcludedUPCToSQL(submissionID, value)
 
                 if badUPCs and not UPCs:
                     print(f"({submissionNumber}) all UPCs are invalid")
@@ -47,7 +47,7 @@ def main():
             except Exception as e:
                 print(f"Failed to print {submissionNumber} with ID [{submissionID}]: {e}")
         
-            saveLastSeen(submissionNumber + 1) # if script crashes, this saves where it left off. 
+            exclusionSaveLastSeen(submissionNumber + 1) # if script crashes, this saves where it left off. 
 
 if __name__ == "__main__":
     main()

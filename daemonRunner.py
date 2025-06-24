@@ -1,5 +1,6 @@
 import time, datetime
 from main import main
+from submissions import submissions
 
 sleepSeconds = 30 # 12 hours (43200) when running on server
 
@@ -10,6 +11,8 @@ def runDaemon():
     try:
         print(f"Running daemon at {currentTime}", flush=True)
         main()
+        submissions()
+        
     except Exception as e:
         print(f"Daemon crashed at {currentTime}: {e}", flush=True)
     time.sleep(sleepSeconds)

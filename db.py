@@ -9,6 +9,10 @@ user = os.getenv("MYSQL_USER")
 password = os.getenv("MYSQL_PASSWORD")
 database = os.getenv("MYSQL_DATABASE")
 
+# ---------------------------------------------
+# ------------ EXCLUSION FUNCTIONS ------------ 
+# ---------------------------------------------
+
 def getExclusionRows(start, end):
     conn = mysql.connector.connect(
         host = host,
@@ -27,7 +31,7 @@ def getExclusionRows(start, end):
     conn.close()
     return rows
 
-def insertUPCToSQL(submissionID, UPC):
+def insertExcludedUPCToSQL(submissionID, UPC):
     conn = mysql.connector.connect(
         host = host,
         user = user,
@@ -40,7 +44,7 @@ def insertUPCToSQL(submissionID, UPC):
     conn.commit()
     conn.close()
 
-def getLatestSubmissionNumber():
+def getLatestExclusionSubmissionNumber():
     conn = mysql.connector.connect(
         host = host,
         user = user,
@@ -55,14 +59,75 @@ def getLatestSubmissionNumber():
 
     return maxNumber
 
-def loadLastSeen():
+def exclusionLoadLastSeen():
     try: 
-        with open("last_seen.txt", "r") as f:
+        with open("exclusion_last_seen.txt", "r") as f:
             return int(f.read().strip())
         
     except FileNotFoundError:
         return 0
     
-def saveLastSeen(number):
-    with open("last_seen.txt", "w") as f:
+def exclusionSaveLastSeen(number):
+    with open("exclusion_last_seen.txt", "w") as f:
         f.write(str(number))
+
+
+# ---------------------------------------------
+# ------------ SUBMISSION FUNCTIONS -----------
+# ---------------------------------------------
+
+def getSubmissionRows(start, end):
+    conn = mysql.connector.connect(
+        host = host,
+        user = user,
+        password = password,
+        database = database
+    )
+
+    cursor = conn.cursor()
+    cursor.execute()  # ADD QUERY HERE
+    rows = cursor.fetchall()
+
+    conn.close()
+    return rows
+
+def insertSubmissionUPCtoSQL(submissionID, UPC):
+    conn = mysql.connector.connect(
+        host = host,
+        user = user,
+        password = password,
+        database = database
+    )
+
+    cursor = conn.cursor()
+    cursor.execute("") # ADD QUERY HERE
+    conn.commit()
+    conn.close()
+
+def getLatestSubmissionSubmissionNumber():
+    conn = mysql.connector.connect(
+        host = host,
+        user = user,
+        password = password,
+        database = database
+    )
+
+    cursor = conn.cursor()
+    cursor.execute("") # ADD QUERY HERE
+    maxNumber= cursor.fetchone()[0]
+    conn.close
+
+    return maxNumber
+
+def submissionLoadLastSeen():
+    try: 
+        with open("submission_last_seen.txt", "r") as f:
+            return int(f.read().strip())
+        
+    except FileNotFoundError:
+        return 0
+
+def submissionSaveLastSeen(number):
+    with open("submission_last_seen.txt", "w") as f:
+        f.write(str(number))
+    
