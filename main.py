@@ -1,21 +1,20 @@
 from db import getExclusionRows, insertUPCToSQL, getLatestSubmissionNumber, loadLastSeen, saveLastSeen
 from parser import isValidCSV
 from downloader import retrieveUPC
-from daemonRunner import runDaemon
 import csv, datetime
 
 def main():
     startIndex = loadLastSeen()
     maxIndex = getLatestSubmissionNumber()
 
-    if startIndex > maxIndex:
+    if startIndex > maxIndex: # check for new rows
         print("No new rows to process.")
         return
     
-    currentDate = datetime.datetime.now()
+    currentDate = datetime.datetime.now() # get current date and time
     formatDate = currentDate.strftime("%Y-%m-%d %H-%M-%S")
 
-    with open(f"Unsuccessful Rows/{formatDate}.csv", "w", newline='') as csvfile:
+    with open(f"Unsuccessful Rows/{formatDate}.csv", "w", newline='') as csvfile: # write unsuccessful rows to a CSV file
         writer = csv.writer(csvfile)
         writer.writerow(["Submission Number", "Submission ID", "itemFile", "Error"])
 
@@ -51,4 +50,4 @@ def main():
             saveLastSeen(submissionNumber + 1) # if script crashes, this saves where it left off. 
 
 if __name__ == "__main__":
-    runDaemon()
+    main()
