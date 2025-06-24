@@ -31,7 +31,7 @@ def retrieveUPC(url):
 
         cleanedValue = re.sub(r"[^0-9]", "", rawValue)
 
-        if cleanedValue.isdigit():
+        if cleanedValue:
             UPCValues.append(cleanedValue)
         else:
             badUPCs.append(rawValue)    

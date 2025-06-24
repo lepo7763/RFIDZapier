@@ -1,15 +1,19 @@
 import time, datetime
 from main import main
 
-sleepSeconds = 300 # currently 5m, change to 12 hours (43200) when running on server
-currentDateTime = datetime.datetime.now()
-currentTime = currentDateTime.strftime("%Y-%m-%d %H-%M-%S")
+sleepSeconds = 30 # 12 hours (43200) when running on server
+
 
 def runDaemon():
+    currentDateTime = datetime.datetime.now()
+    currentTime = currentDateTime.strftime("%Y-%m-%d %H-%M-%S")
     try:
         print(f"Running daemon at {currentTime}", flush=True)
         main()
     except Exception as e:
         print(f"Daemon crashed at {currentTime}: {e}", flush=True)
     time.sleep(sleepSeconds)
+    runDaemon()  
 
+if __name__ == "__main__":
+    runDaemon()
