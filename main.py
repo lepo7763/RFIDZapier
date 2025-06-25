@@ -12,9 +12,9 @@ def main():
         return
     
     currentDate = datetime.datetime.now() # get current date and time
-    formatDate = currentDate.strftime("%Y-%m-%d %H-%M-%S")
-
-    with open(f"Unsuccessful Exclusion Rows/{formatDate}.csv", "w", newline='') as csvfile: # write unsuccessful rows to a CSV file
+    dayDate = currentDate.strftime("%Y-%m-%d")
+    timeDate = currentDate.strftime("%H-%M-%S")
+    with open(f"Unsuccessful Exclusion Rows/{dayDate} at {timeDate}.csv", "w", newline='') as csvfile: # write unsuccessful rows to a CSV file
         writer = csv.writer(csvfile)
         writer.writerow(["Submission Number", "Submission ID", "itemFile", "Error"])
 

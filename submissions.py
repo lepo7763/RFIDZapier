@@ -17,28 +17,26 @@ def submissions():
         return
     
     currentDate = datetime.datetime.now()
-    formatDate = currentDate.strftime("%Y-%m-%d %H-%M-%S")
-
-    with open(f"Unsuccessful Submission Rows/{formatDate}.csv", "w", newline='') as csvfile:
+    dayDate = currentDate.strftime("%Y-%m-%d")
+    timeDate = currentDate.strftime("%H-%M-%S")
+    with open(f"Unsuccessful Submission Rows/{dayDate} at {timeDate}.csv", "w", newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(["Submission Number", "Submission ID", "itemFile", "Error"]) 
 
         rows = getSubmissionRows(startIndex, maxIndex)
 
         for submissionID, submissionNumber, itemFile, gtin in rows: 
-            # -------------------------------------------------------------
-            # issue: submisisonnumber isn't uniform. skip when not present?
-            # -------------------------------------------------------------
             if not (itemFile and itemFile.strip()):
                 print(f"{submissionNumber} itemFile is not present, using GTIN: {gtin}")
+                writer.writerow([submissionNumber, f"{submissionID}", "itemFile Not Present", "Used GTIN As UPCs"])
                 # insertSubmissionUPCtoSQL(submissionID, gtin)
-                submissionSaveLastSeen(submissionNumber + 1) # if script crashes, this saves where it left off
+                submissionSaveLastSeen(int(submissionNumber) + 1) # if script crashes, this saves where it left off
                 continue
 
             elif not isValidSubmissionCSV(itemFile):
                 print(f"{submissionNumber}) has a bad URL")
-                writer.writerow([submissionNumber, submissionID, itemFile, "Bad URL"])
-                submissionSaveLastSeen(submissionNumber + 1) 
+                writer.writerow([submissionNumber, f"{submissionID}", itemFile, "Bad URL"])
+                submissionSaveLastSeen(int(submissionNumber) + 1) 
                 continue
             
             print(f"{submissionNumber} Submission ID [{submissionID}] has a valid CSV")
@@ -51,20 +49,20 @@ def submissions():
                         print(f"Found UPC: {upc}")
                         # insertSubmissionUPCtoSQL(submissionID, upc)
                     for bad in badUPCs:
-                        writer.writerow([submissionNumber, submissionID, itemFile, f"Bad UPC Value - {bad}"])
+                        writer.writerow([submissionNumber, f"{submissionID}", itemFile, f"Bad UPC Value - {bad}"])
 
                 elif badUPCs: # if UPC column is empty
                     print(f"({submissionNumber}) all UPC values are invalid")
-                    writer.writerow([submissionNumber, submissionID, itemFile, "All UPCs Invalid"])
+                    writer.writerow([submissionNumber, f"{submissionID}", itemFile, "All UPCs Invalid"])
 
                 else: # if both UPC and badUPC columns are empty
                     print(f"({submissionNumber}) missing UPC column entirely")
-                    writer.writerow([submissionNumber, submissionID, itemFile, "Missing UPC Column"])
+                    writer.writerow([submissionNumber, f"{submissionID}", itemFile, "Missing UPC Column"])
 
             except Exception as e:
                 print(f"Failed to process {submissionNumber} with ID [{submissionID}]: {e}")
             
-            submissionSaveLastSeen(submissionNumber + 1)  # Save progress in case of crash
+            submissionSaveLastSeen(int(submissionNumber) + 1)  # Save progress in case of crash
 
 if __name__ == "__main__":
     submissions()

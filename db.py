@@ -58,7 +58,7 @@ def getLatestExclusionSubmissionNumber():
     maxNumber = cursor.fetchone()[0]
     conn.close()
 
-    return maxNumber
+    return int(maxNumber)
 
 def exclusionLoadLastSeen():
     try: 
@@ -117,11 +117,11 @@ def getLatestSubmissionSubmissionNumber():
     )
 
     cursor = conn.cursor()
-    cursor.execute("SELECT MAX(submission) FROM alec_site.general_form_subs") # ADD QUERY HERE
-    maxNumber= cursor.fetchone()[0]
+    cursor.execute("SELECT MAX(submission) FROM alec_site.general_form_subs") 
+    maxNumber = cursor.fetchone()[0]
     conn.close
 
-    return maxNumber
+    return int(maxNumber)
 
 def submissionLoadLastSeen():
     try: 
