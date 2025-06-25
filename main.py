@@ -31,18 +31,20 @@ def main():
                 
             try:
                 UPCs, badUPCs = retrieveUPC(itemFile) 
-                if UPCs:
-                    for value in UPCs:
-                        print(f"Found UPC: {value}")
-                        # insertExcludedUPCToSQL(submissionID, value)
-
-                if badUPCs and not UPCs:
-                    print(f"({submissionNumber}) all UPCs are invalid")
-                    writer.writerow([submissionNumber, submissionID, itemFile, "All UPCs invalid"])
-
-                elif not UPCs and not badUPCs:
-                    print(f"({submissionNumber}) missing UPC column entirely")
-                    writer.writerow([submissionNumber, submissionID, itemFile, "Missing UPC column"])
+                if UPCs: # if UPC column isn't empty
+                    for upc in UPCs:
+                        print(f"Found UPC: {upc}")
+                        # insertExcludedUPCToSQL(submissionID, upc)
+                    for bad in badUPCs:
+                        writer.writerow([submissionNumber, submissionID, itemFile, f"Bad UPC Value - {bad}"])
+                
+                elif badUPCs: # if UPC column is empty
+                    print(f"({submissionNumber}) all UPC values are invalid")
+                    writer.writerow([submissionNumber, submissionID, itemFile, "All UPCs Invalid"])
+                
+                else: # if both UPC and badUPC columns are empty
+                    print(f"({submissionNumber}) missing UPC Column entirely")
+                    writer.writerow([submissionNumber, submissionID, itemFile, "Missing UPC Column"])
 
             except Exception as e:
                 print(f"Failed to print {submissionNumber} with ID [{submissionID}]: {e}")

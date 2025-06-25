@@ -7,7 +7,8 @@ load_dotenv()
 host = os.getenv("MYSQL_HOST")
 user = os.getenv("MYSQL_USER")
 password = os.getenv("MYSQL_PASSWORD")
-database = os.getenv("MYSQL_DATABASE")
+databaseExclusion = os.getenv("MYSQL_DATABASE_EXCLUSION")
+databaseSubmission = os.getenv("MYSQL_DATABASE_SUBMISSION")
 
 # ---------------------------------------------
 # ------------ EXCLUSION FUNCTIONS ------------ 
@@ -18,7 +19,7 @@ def getExclusionRows(start, end):
         host = host,
         user = user,
         password = password,
-        database = database 
+        database = databaseExclusion 
     )
 
     cursor = conn.cursor()
@@ -36,7 +37,7 @@ def insertExcludedUPCToSQL(submissionID, UPC):
         host = host,
         user = user,
         password = password,
-        database = database 
+        database = databaseExclusion 
     )
 
     cursor = conn.cursor()
@@ -49,7 +50,7 @@ def getLatestExclusionSubmissionNumber():
         host = host,
         user = user,
         password = password,
-        database = database 
+        database = databaseExclusion 
     )
 
     cursor = conn.cursor()
@@ -81,11 +82,14 @@ def getSubmissionRows(start, end):
         host = host,
         user = user,
         password = password,
-        database = database
+        database = databaseSubmission
     )
 
     cursor = conn.cursor()
-    cursor.execute()  # ADD QUERY HERE
+    cursor.execute("""SELECT submission_id, submission, item_file, gtin
+                   FROM alec_site.general_form_subs 
+                   WHERE submission
+                   BETWEEN %s AND %s""", (start, end)) 
     rows = cursor.fetchall()
 
     conn.close()
@@ -96,7 +100,7 @@ def insertSubmissionUPCtoSQL(submissionID, UPC):
         host = host,
         user = user,
         password = password,
-        database = database
+        database = databaseSubmission
     )
 
     cursor = conn.cursor()
@@ -109,11 +113,11 @@ def getLatestSubmissionSubmissionNumber():
         host = host,
         user = user,
         password = password,
-        database = database
+        database = databaseSubmission
     )
 
     cursor = conn.cursor()
-    cursor.execute("") # ADD QUERY HERE
+    cursor.execute("SELECT MAX(submission) FROM alec_site.general_form_subs") # ADD QUERY HERE
     maxNumber= cursor.fetchone()[0]
     conn.close
 
