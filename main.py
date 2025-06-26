@@ -48,7 +48,8 @@ def main():
 
             except Exception as e:
                 print(f"Failed to print {submissionNumber} with ID [{submissionID}]: {e}")
-        
+                writer.writerow([submissionNumber, submissionID, itemFile, "Failed to Retrieve UPC Value(s)"])
+
             exclusionSaveLastSeen(submissionNumber + 1) # if script crashes, this saves where it left off. 
 
 if __name__ == "__main__":

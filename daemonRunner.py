@@ -10,6 +10,7 @@ def runDaemon():
         now = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
         try:
             print(f"Running daemon at {now}", flush=True)
+            main()
             submissions()
             
         except Exception as e:

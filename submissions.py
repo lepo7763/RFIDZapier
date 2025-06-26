@@ -61,7 +61,8 @@ def submissions():
 
             except Exception as e:
                 print(f"Failed to process {submissionNumber} with ID [{submissionID}]: {e}")
-            
+                writer.writerow([submissionNumber, f"{submissionID}", itemFile, "Failed to Retrieve UPC Value(s)"])
+
             submissionSaveLastSeen(int(submissionNumber) + 1)  # Save progress in case of crash
 
 if __name__ == "__main__":
