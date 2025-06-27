@@ -27,9 +27,9 @@ def submissions():
 
         for submissionID, submissionNumber, itemFile, gtin in rows: 
             if not (itemFile and itemFile.strip()):
-                print(f"{submissionNumber} itemFile is not present, using GTIN: {gtin}")
+                print(f"{submissionNumber} itemFile is not present, using GTIN instead: {gtin}")
                 writer.writerow([submissionNumber, f"{submissionID}", "itemFile Not Present", "Used GTIN As UPCs"])
-                # insertSubmissionUPCtoSQL(submissionID, gtin)
+                insertSubmissionUPCtoSQL(submissionID, gtin)
                 submissionSaveLastSeen(int(submissionNumber) + 1) # if script crashes, this saves where it left off
                 continue
 
@@ -47,7 +47,7 @@ def submissions():
                 if UPCs: # if UPC column isn't empty
                     for upc in UPCs:
                         print(f"Found UPC: {upc}")
-                        # insertSubmissionUPCtoSQL(submissionID, upc)
+                        insertSubmissionUPCtoSQL(submissionID, upc)
                     for bad in badUPCs:
                         writer.writerow([submissionNumber, f"{submissionID}", itemFile, f"Bad UPC Value - {bad}"])
 

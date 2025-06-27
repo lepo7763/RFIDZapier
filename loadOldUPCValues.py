@@ -22,7 +22,7 @@ def getRows():
         host = host,
         user = user,
         password = password,
-        database = databaseExclusion 
+        database = databaseExclusion # change?
     )
 
     cursor = conn.cursor()
@@ -41,7 +41,7 @@ def thing(submissionID, UPC):
         host = host,
         user = user,
         password = password,
-        database = databaseSubmission
+        database = databaseSubmission #change?
     )
 
     cursor = conn.cursor()

@@ -29,6 +29,7 @@ def getExclusionRows(start, end):
                    BETWEEN %s AND %s""", (start, end)) 
     rows = cursor.fetchall()
 
+    cursor.close()
     conn.close()
     return rows
 
@@ -43,6 +44,7 @@ def insertExcludedUPCToSQL(submissionID, UPC):
     cursor = conn.cursor()
     cursor.execute("INSERT INTO excluded_upc (submission_id, upc) VALUES (%s, %s)", (submissionID, UPC))
     conn.commit()
+    cursor.close()
     conn.close()
 
 def getLatestExclusionSubmissionNumber():
@@ -56,6 +58,7 @@ def getLatestExclusionSubmissionNumber():
     cursor = conn.cursor()
     cursor.execute("SELECT MAX(submission_number) FROM exclusion") 
     maxNumber = cursor.fetchone()[0]
+    cursor.close()
     conn.close()
 
     return int(maxNumber)
@@ -92,10 +95,11 @@ def getSubmissionRows(start, end):
                    BETWEEN %s AND %s""", (start, end)) 
     rows = cursor.fetchall()
 
+    cursor.close()
     conn.close()
     return rows
 
-def insertSubmissionUPCtoSQL(submissionID, UPC):
+def insertSubmissionUPCtoSQL(submissionID, value):
     conn = mysql.connector.connect(
         host = host,
         user = user,
@@ -104,8 +108,9 @@ def insertSubmissionUPCtoSQL(submissionID, UPC):
     )
 
     cursor = conn.cursor()
-    cursor.execute("") # ADD QUERY HERE
+    cursor.execute("INSERT INTO alec_testing.general_item_file_upc (submission_id, upc) VALUES (%s, %s)", (submissionID, value)) 
     conn.commit()
+    cursor.close()  
     conn.close()
 
 def getLatestSubmissionSubmissionNumber():
@@ -119,6 +124,7 @@ def getLatestSubmissionSubmissionNumber():
     cursor = conn.cursor()
     cursor.execute("SELECT MAX(submission) FROM alec_site.general_form_subs") 
     maxNumber = cursor.fetchone()[0]
+    cursor.close()
     conn.close
 
     return int(maxNumber)
