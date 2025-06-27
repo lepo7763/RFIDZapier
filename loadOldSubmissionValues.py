@@ -5,6 +5,11 @@ from downloader import retrieveUPC
 
 # Searches from september to present day for any missing UPC/GTIN values in submission
 
+
+# --------------------------------------------------------------------------------
+# ---------------------------------TEST BEFORE RUNNING----------------------------
+# --------------------------------------------------------------------------------
+# test the duplicate rule in the table
 load_dotenv()
 
 host = os.getenv("MYSQL_HOST")
@@ -77,7 +82,11 @@ def runScript():
                 if UPCs: # ifUPC Column isn't empty
                     for upc in UPCs:
                         print(f"Found UPC: {upc}")
-                        insertMissingIntoSQL(submissionID, upc)
+                        try:
+                            insertMissingIntoSQL(submissionID, upc)
+                        except mysql.connector.IntegrityError:
+                            print(mysql.connector.IntegrityError)
+                            writer.writerow([submissionNumber, submissionID, itemFile, "Already Exists in Table"])
                     for bad in badUPCs:
                         writer.writerow([submissionNumber, f"{submissionID}", itemFile, f"Bad UPC Value - {bad}"])
                 
