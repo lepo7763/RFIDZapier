@@ -9,7 +9,8 @@ from downloader import retrieveUPC
 # --------------------------------------------------------------------------------
 # ---------------------------------TEST BEFORE RUNNING----------------------------
 # --------------------------------------------------------------------------------
-# test the duplicate rule in the table
+# RESULT: duplicate rule not on !
+
 load_dotenv()
 
 host = os.getenv("MYSQL_HOST")
@@ -51,6 +52,23 @@ def insertMissingIntoSQL(submissionID, value):
     cursor.close()
     conn.close()
 
+def checkSQL(submissionID, value): #check for duplicates in the sql db
+    conn = mysql.connector.connect(
+        host = host,
+        user = user,
+        password = password,
+        database = databaseSubmission
+    )
+
+    cursor = conn.cursor()
+    cursor.execute("""SELECT submission_id, upc FROM alec_site.general_item_file_upc 
+                   WHERE submission_id = %s AND upc = %s LIMIT 1""", (submissionID, value))
+    exists = cursor.fetchone() is not None
+
+    cursor.close()
+    conn.close()
+    return exists
+
 def runScript():
     currentDate = datetime.datetime.now() # get current date and time
     dayDate = currentDate.strftime("%Y-%m-%d")
@@ -79,13 +97,13 @@ def runScript():
             try:
                 UPCs, badUPCs = retrieveUPC(itemFile)
 
-                if UPCs: # ifUPC Column isn't empty
+                if UPCs: # if UPC Column isn't empty
                     for upc in UPCs:
                         print(f"Found UPC: {upc}")
-                        try:
+                        if not checkSQL(submissionID, upc): #check for duplicates, if not, insert into sql
                             insertMissingIntoSQL(submissionID, upc)
-                        except mysql.connector.IntegrityError:
-                            print(mysql.connector.IntegrityError)
+                        else: 
+                            print(mysql.connector.IntegrityError)  
                             writer.writerow([submissionNumber, submissionID, itemFile, "Already Exists in Table"])
                     for bad in badUPCs:
                         writer.writerow([submissionNumber, f"{submissionID}", itemFile, f"Bad UPC Value - {bad}"])
