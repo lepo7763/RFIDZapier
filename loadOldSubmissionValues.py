@@ -2,14 +2,10 @@ import mysql.connector, os, csv, datetime
 from dotenv import load_dotenv
 from parser import isValidSubmissionCSV
 from downloader import retrieveUPC
-
 # Searches from september to present day for any missing UPC/GTIN values in submission
 
 
-# --------------------------------------------------------------------------------
-# ---------------------------------TEST BEFORE RUNNING----------------------------
-# --------------------------------------------------------------------------------
-# RESULT: duplicate rule not on !
+
 
 load_dotenv()
 
@@ -30,8 +26,8 @@ def getSubmissionRows():
     cursor = conn.cursor()
     cursor.execute("""SELECT submission_id, submission, item_file, gtin
                    FROM alec_site.general_form_subs 
-                   WHERE submission_date >= '2024-09-01' 
-                   AND submission_date < '2024-10-01'""") 
+                   WHERE submission_date >= '2025-5-01' 
+                   AND submission_date < '2025-6-01'""") # May
     rows = cursor.fetchall()
 
     cursor.close()
@@ -74,17 +70,31 @@ def runScript():
     dayDate = currentDate.strftime("%Y-%m-%d")
     timeDate = currentDate.strftime("%H-%M-%S")
 
-    with open(f"Unsuccessful Submission Rows/{dayDate} at {timeDate}.csv", "w", newline='') as csvfile:
+# {dayDate} at {timeDate}.csv
+
+    with open(f"Unsuccessful Submission Rows/May Run for loading old submissions.csv", "w", newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(["Submission Number", "Submission ID", "itemFile", "Error"])
 
         rows = getSubmissionRows()
 
         for submissionID, submissionNumber, itemFile, gtin in rows:
-            if not (itemFile and itemFile.strip()):
-                print(f"{submissionNumber} itemFile is not present, using GTIN instead: {gtin}")
-                writer.writerow([submissionNumber, f"{submissionID}", "itemFile not Present", "Used GTIN as UPC"])
-                insertMissingIntoSQL(submissionID, gtin)
+            if not (itemFile and itemFile.strip()) and not gtin:
+                print(f"{submissionNumber} does not have itemFile and GTIN. Skipping...")
+                writer.writerow([submissionNumber, f"{submissionID}", "itemFile not present", "Both GTIN and itemFile not present (skipped)"])
+                continue
+            elif not (itemFile and itemFile.strip()):
+                if not checkSQL(submissionID, gtin): #check if submissionid doesn't have the gtin, if true -> execute
+                    print(f"({submissionNumber}) itemFile is not present, using GTIN instead: {gtin}")
+                    writer.writerow([submissionNumber, f"{submissionID}", "itemFile not Present", f"Used GTIN ({gtin}) as UPC"])
+                    try:
+                        insertMissingIntoSQL(submissionID, gtin)
+                    except mysql.connector.Error as e:
+                        print(f"MySql Error: {e}")
+                        writer.writerow([submissionNumber, f"{submissionID}", itemFile, f"{e}"])
+                else:
+                    print(f"{submissionID} itemFile is not present, but used GTIN ({gtin}) already") 
+                    writer.writerow([submissionNumber, f"{submissionID}", "itemFile not Present", "GTIN already present as UPC (handled and skipped)"])
                 continue
 
             elif not isValidSubmissionCSV(itemFile):
@@ -98,6 +108,8 @@ def runScript():
                 UPCs, badUPCs = retrieveUPC(itemFile)
 
                 if UPCs: # if UPC Column isn't empty
+                    if not checkSQL(submissionID, gtin):
+                        insertMissingIntoSQL(submissionID, gtin) # add gtin to the submissionID along with the UPC values
                     for upc in UPCs:
                         print(f"Found UPC: {upc}")
                         if not checkSQL(submissionID, upc): #check for duplicates, if not, insert into sql
@@ -105,6 +117,7 @@ def runScript():
                         else: 
                             print(mysql.connector.IntegrityError)  
                             writer.writerow([submissionNumber, submissionID, itemFile, "Already Exists in Table"])
+
                     for bad in badUPCs:
                         writer.writerow([submissionNumber, f"{submissionID}", itemFile, f"Bad UPC Value - {bad}"])
                 
@@ -116,12 +129,9 @@ def runScript():
                     print(f"({submissionNumber}) missing UPC column entirely")
                     writer.writerow([submissionNumber, f"{submissionID}", itemFile, "Missing UPC Column"])
 
-
-
             except Exception as e:
                 print(f"Failed to process {submissionNumber} with ID [{submissionID}]: {e}")
                 writer.writerow([submissionNumber, f"{submissionID}", itemFile, "Failed to Retrieve UPC Value(s)"])
-
 
 if __name__ == "__main__":
     runScript()

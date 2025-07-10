@@ -1,4 +1,4 @@
-import csv, datetime
+import csv, datetime, mysql.connector
 from parser import isValidSubmissionCSV
 from db import submissionLoadLastSeen, submissionSaveLastSeen, getSubmissionRows, insertSubmissionUPCtoSQL, getLatestSubmissionSubmissionNumber
 from downloader import retrieveUPC
@@ -26,13 +26,21 @@ def submissions():
         rows = getSubmissionRows(startIndex, maxIndex)
 
         for submissionID, submissionNumber, itemFile, gtin in rows: 
-            if not (itemFile and itemFile.strip()):
+            if not (itemFile and itemFile.strip()) and not gtin:
+                print(f"{submissionNumber} does not have itemFile and GTIN. Skipping...")
+                writer.writerow([submissionNumber, f"{submissionID}", "itemFile not present", "Both GTIN and itemFile not present (skipped)"])
+                continue
+            elif not (itemFile and itemFile.strip()):
                 print(f"{submissionNumber} itemFile is not present, using GTIN instead: {gtin}")
                 writer.writerow([submissionNumber, f"{submissionID}", "itemFile Not Present", "Used GTIN As UPCs"])
-                insertSubmissionUPCtoSQL(submissionID, gtin)
+                try:
+                    insertSubmissionUPCtoSQL(submissionID, gtin)
+                except mysql.connector.Error as e:
+                    print(f"MySql Error: {e}")
+                    writer.writerow([submissionNumber, f"{submissionID}", itemFile, f"{e}"])
+
                 submissionSaveLastSeen(int(submissionNumber) + 1) # if script crashes, this saves where it left off
                 continue
-
             elif not isValidSubmissionCSV(itemFile):
                 print(f"{submissionNumber}) has a bad URL")
                 writer.writerow([submissionNumber, f"{submissionID}", itemFile, "Bad URL"])
@@ -45,6 +53,7 @@ def submissions():
                 UPCs, badUPCs = retrieveUPC(itemFile)
 
                 if UPCs: # if UPC column isn't empty
+                    insertSubmissionUPCtoSQL(submissionID, gtin)
                     for upc in UPCs:
                         print(f"Found UPC: {upc}")
                         insertSubmissionUPCtoSQL(submissionID, upc)
@@ -64,6 +73,8 @@ def submissions():
                 writer.writerow([submissionNumber, f"{submissionID}", itemFile, "Failed to Retrieve UPC Value(s)"])
 
             submissionSaveLastSeen(int(submissionNumber) + 1)  # Save progress in case of crash
+    print(f"Finished Submissions for {dayDate} at {timeDate}")
+
 
 if __name__ == "__main__":
     submissions()

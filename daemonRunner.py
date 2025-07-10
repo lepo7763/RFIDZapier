@@ -2,6 +2,11 @@ import time, datetime
 from main import main
 from submissions import submissions
 
+# start of daemon addon 
+import sys, os, time, argparse, logging, daemon
+from daemon import pidfile
+
+
 sleepSeconds = 10 # 12 hours (43200) when running on server
 
 

@@ -51,6 +51,7 @@ def main():
                 writer.writerow([submissionNumber, submissionID, itemFile, "Failed to Retrieve UPC Value(s)"])
 
             exclusionSaveLastSeen(submissionNumber + 1) # if script crashes, this saves where it left off. 
-
+    print(f"Finished Exclusion for {dayDate} at {timeDate}")
+    
 if __name__ == "__main__":
     main()
