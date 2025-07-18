@@ -23,8 +23,8 @@ def getExclusionRows(start, end):
     )
 
     cursor = conn.cursor()
-    cursor.execute("""SELECT submission_id, submission_number, item_file 
-                   FROM exclusion 
+    cursor.execute("""SELECT DISTINCT submission_id, submission_number, item_file 
+                   FROM alec_site.exclusion 
                    WHERE submission_number 
                    BETWEEN %s AND %s""", (start, end)) 
     rows = cursor.fetchall()
@@ -42,7 +42,7 @@ def insertExcludedUPCToSQL(submissionID, UPC):
     )
 
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO excluded_upc (submission_id, upc) VALUES (%s, %s)", (submissionID, UPC))
+    cursor.execute("INSERT INTO alec_site.excluded_upc (submission_id, upc) VALUES (%s, %s)", (submissionID, UPC))
     conn.commit()
     cursor.close()
     conn.close()
@@ -56,7 +56,7 @@ def getLatestExclusionSubmissionNumber():
     )
 
     cursor = conn.cursor()
-    cursor.execute("SELECT MAX(submission_number) FROM exclusion") 
+    cursor.execute("SELECT MAX(submission_number) FROM alec_site.exclusion") 
     maxNumber = cursor.fetchone()[0]
     cursor.close()
     conn.close()

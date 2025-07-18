@@ -29,7 +29,8 @@ def getRows():
     cursor.execute("""SELECT submission_id, submission_number, item_file
                    FROM alec_site.exclusion
                    WHERE submission_date
-                   BETWEEN '2024-09-01' and '2025-06-30'""") # set dates
+                   BETWEEN '2025-06-30' 
+                   and '2025-07-30'""") # set dates
     rows = cursor.fetchall()
 
     cursor.close()

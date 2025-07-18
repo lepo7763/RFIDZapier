@@ -1,7 +1,38 @@
 from db import getExclusionRows, insertExcludedUPCToSQL, getLatestExclusionSubmissionNumber, exclusionLoadLastSeen, exclusionSaveLastSeen
 from parser import isValidExclusionCSV
 from downloader import retrieveUPC
-import csv, datetime
+import csv, datetime, mysql.connector, os
+from dotenv import load_dotenv
+from mysql.connector import pooling, IntegrityError
+
+# actively take new submissions for exclusion (excluded upcs) and add them
+
+load_dotenv()
+HOST      = os.getenv("MYSQL_HOST")
+USER      = os.getenv("MYSQL_USER")
+PASSWORD  = os.getenv("MYSQL_PASSWORD")
+DB_EXCL   = os.getenv("MYSQL_DATABASE_EXCLUSION")
+
+POOL = pooling.MySQLConnectionPool(
+    pool_name="excl_pool",
+    pool_size=4,           # adjust if we need more concurrency
+    host=HOST,
+    user=USER,
+    password=PASSWORD,
+    database=DB_EXCL,
+    autocommit=False       # we’ll commit once per batch
+)
+
+def checkExclusionSQL(submissionID, value):
+    conn = POOL.get_connection()
+    cursor = conn.cursor(prepared = True)
+    cursor.execute("""SELECT submission_id, upc FROM alec_site.excluded_upc
+                   WHERE submission_id = %s AND upc = %s LIMIT 1""", (submissionID, value))
+    exists = cursor.fetchone() is not None
+
+    cursor.close()
+    conn.close()
+    return exists
 
 def main():
     startIndex = exclusionLoadLastSeen()
@@ -19,7 +50,6 @@ def main():
         writer.writerow(["Submission Number", "Submission ID", "itemFile", "Error"])
 
         rows = getExclusionRows(startIndex, maxIndex) 
-
         for submissionID, submissionNumber, itemFile in rows:
             if not isValidExclusionCSV(itemFile):
                 print(f"({submissionNumber}) has a bad URL")
@@ -34,7 +64,11 @@ def main():
                 if UPCs: # if UPC column isn't empty
                     for upc in UPCs:
                         print(f"Found UPC: {upc}")
-                        # insertExcludedUPCToSQL(submissionID, upc)
+                        if not checkExclusionSQL(submissionID, upc):
+                            insertExcludedUPCToSQL(submissionID, upc)
+                        else:
+                            print(mysql.connector.IntegrityError)
+                            writer.writerow([submissionNumber, submissionID, itemFile, "Already Exists in Table"])
                     for bad in badUPCs:
                         writer.writerow([submissionNumber, submissionID, itemFile, f"Bad UPC Value - {bad}"])
                 

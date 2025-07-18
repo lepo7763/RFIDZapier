@@ -26,8 +26,8 @@ def getSubmissionRows():
     cursor = conn.cursor()
     cursor.execute("""SELECT submission_id, submission, item_file, gtin
                    FROM alec_site.general_form_subs 
-                   WHERE submission_date >= '2025-5-01' 
-                   AND submission_date < '2025-6-01'""") # May
+                   WHERE submission_date >= '2025-6-01' 
+                   AND submission_date < '2025-7-01'""") # June
     rows = cursor.fetchall()
 
     cursor.close()
@@ -72,7 +72,7 @@ def runScript():
 
 # {dayDate} at {timeDate}.csv
 
-    with open(f"Unsuccessful Submission Rows/May Run for loading old submissions.csv", "w", newline='') as csvfile:
+    with open(f"Unsuccessful Submission Rows/June Run for loading old submissions.csv", "w", newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(["Submission Number", "Submission ID", "itemFile", "Error"])
 
