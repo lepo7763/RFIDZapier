@@ -20,8 +20,7 @@ load_dotenv()
 HOST      = os.getenv("MYSQL_HOST")
 USER      = os.getenv("MYSQL_USER")
 PASSWORD  = os.getenv("MYSQL_PASSWORD")
-DB_EXCL   = os.getenv("MYSQL_DATABASE_EXCLUSION")
-DB_SUBMIT = os.getenv("MYSQL_DATABASE_SUBMISSION")
+DB        = os.getenv("MYSQL_DATABASE")
 
 # Build a small connection‑pool we can borrow from
 POOL = pooling.MySQLConnectionPool(
@@ -30,7 +29,7 @@ POOL = pooling.MySQLConnectionPool(
     host=HOST,
     user=USER,
     password=PASSWORD,
-    database=DB_SUBMIT,
+    database=DB,
     autocommit=False       # we’ll commit once per batch
 )
 

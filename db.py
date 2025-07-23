@@ -1,65 +1,47 @@
 import mysql.connector
 import os
 from dotenv import load_dotenv
+from mysql.connector import pooling, IntegrityError
 
-load_dotenv()
+load_dotenv(r"C:\Users\Ranfe\Music\RFIDZapier\.env") # TODO: change to C:\programdata
 
-host = os.getenv("MYSQL_HOST")
-user = os.getenv("MYSQL_USER")
-password = os.getenv("MYSQL_PASSWORD")
-databaseExclusion = os.getenv("MYSQL_DATABASE_EXCLUSION")
-databaseSubmission = os.getenv("MYSQL_DATABASE_SUBMISSION")
+HOST = os.getenv("MYSQL_HOST")
+USER = os.getenv("MYSQL_USER")
+PASSWORD = os.getenv("MYSQL_PASSWORD")
+DB = os.getenv("MYSQL_DATABASE")
+
+# connection pool to borrow connections from
+POOL = pooling.MySQLConnectionPool(
+    pool_name="db_pool",
+    pool_size=5,
+    host=HOST,
+    user=USER,
+    password=PASSWORD,
+    database=DB,
+    autocommit=True        
+)
+
 
 # ---------------------------------------------
 # ------------ EXCLUSION FUNCTIONS ------------ 
 # ---------------------------------------------
 
 def getExclusionRows(start, end):
-    conn = mysql.connector.connect(
-        host = host,
-        user = user,
-        password = password,
-        database = databaseExclusion 
-    )
-
-    cursor = conn.cursor()
-    cursor.execute("""SELECT DISTINCT submission_id, submission_number, item_file 
+    with POOL.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute("""SELECT DISTINCT submission_id, submission_number, item_file 
                    FROM alec_site.exclusion 
                    WHERE submission_number 
                    BETWEEN %s AND %s""", (start, end)) 
-    rows = cursor.fetchall()
-
-    cursor.close()
-    conn.close()
-    return rows
+        return cursor.fetchall()
 
 def insertExcludedUPCToSQL(submissionID, UPC):
-    conn = mysql.connector.connect(
-        host = host,
-        user = user,
-        password = password,
-        database = databaseExclusion 
-    )
-
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO alec_site.excluded_upc (submission_id, upc) VALUES (%s, %s)", (submissionID, UPC))
-    conn.commit()
-    cursor.close()
-    conn.close()
+    with POOL.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute("INSERT INTO alec_site.excluded_upc (submission_id, upc) VALUES (%s, %s)", (submissionID, UPC))
 
 def getLatestExclusionSubmissionNumber():
-    conn = mysql.connector.connect(
-        host = host,
-        user = user,
-        password = password,
-        database = databaseExclusion 
-    )
-
-    cursor = conn.cursor()
-    cursor.execute("SELECT MAX(submission_number) FROM alec_site.exclusion") 
-    maxNumber = cursor.fetchone()[0]
-    cursor.close()
-    conn.close()
+    with POOL.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute("SELECT MAX(submission_number) FROM alec_site.exclusion") 
+        maxNumber = cursor.fetchone()[0]
 
     return int(maxNumber)
 
@@ -81,52 +63,23 @@ def exclusionSaveLastSeen(number):
 # ---------------------------------------------
 
 def getSubmissionRows(start, end):
-    conn = mysql.connector.connect(
-        host = host,
-        user = user,
-        password = password,
-        database = databaseSubmission
-    )
+    with POOL.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute("""SELECT submission_id, submission, item_file, gtin
+                    FROM alec_site.general_form_subs 
+                    WHERE submission
+                    BETWEEN %s AND %s""", (start, end)) 
+        return cursor.fetchall()
 
-    cursor = conn.cursor()
-    cursor.execute("""SELECT submission_id, submission, item_file, gtin
-                   FROM alec_site.general_form_subs 
-                   WHERE submission
-                   BETWEEN %s AND %s""", (start, end)) 
-    rows = cursor.fetchall()
-
-    cursor.close()
-    conn.close()
-    return rows
 
 def insertSubmissionUPCtoSQL(submissionID, value):
-    conn = mysql.connector.connect(
-        host = host,
-        user = user,
-        password = password,
-        database = databaseSubmission
-    )
-
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO alec_testing.general_item_file_upc (submission_id, upc) VALUES (%s, %s)", (submissionID, value)) 
-    conn.commit()
-    cursor.close()  
-    conn.close()
+    with POOL.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute("INSERT INTO alec_site.general_item_file_upc (submission_id, upc) VALUES (%s, %s)", (submissionID, value)) 
+    
 
 def getLatestSubmissionSubmissionNumber():
-    conn = mysql.connector.connect(
-        host = host,
-        user = user,
-        password = password,
-        database = databaseSubmission
-    )
-
-    cursor = conn.cursor()
-    cursor.execute("SELECT MAX(submission) FROM alec_site.general_form_subs") 
-    maxNumber = cursor.fetchone()[0]
-    cursor.close()
-    conn.close
-
+    with POOL.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute("SELECT MAX(submission) FROM alec_site.general_form_subs") 
+        maxNumber = cursor.fetchone()[0]
     return int(maxNumber)
 
 def submissionLoadLastSeen():

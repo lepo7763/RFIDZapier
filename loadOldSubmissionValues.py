@@ -4,7 +4,20 @@ from parser import isValidSubmissionCSV
 from downloader import retrieveUPC
 # Searches from september to present day for any missing UPC/GTIN values in submission
 
+# change structure to hashmap
 
+
+# 163650 (before running)
+# 164380 (after running for september)
+# 165451 (after running for october)
+# 166214 (after running november)
+# 170116 (after running december)
+# 170650 (after running january)
+# 171470 (after running february)
+# 174195 (after running march)
+# 180419 (after runnning april)
+# 187602 (after running may)
+# 205740 (after running june)
 
 
 load_dotenv()

@@ -15,7 +15,6 @@ host = os.getenv("MYSQL_HOST")
 user = os.getenv("MYSQL_USER")
 password = os.getenv("MYSQL_PASSWORD")
 databaseExclusion = os.getenv("MYSQL_DATABASE_EXCLUSION")
-databaseSubmission = os.getenv("MYSQL_DATABASE_SUBMISSION")
 
 def getRows():
     conn = mysql.connector.connect(
@@ -30,19 +29,19 @@ def getRows():
                    FROM alec_site.exclusion
                    WHERE submission_date
                    BETWEEN '2025-06-30' 
-                   and '2025-07-30'""") # set dates
+                   and '2025-07-30'""") # TODO: set dates
     rows = cursor.fetchall()
 
     cursor.close()
     conn.close()
     return rows
 
-def thing(submissionID, UPC):
+def insertToTable(submissionID, UPC):
     conn = mysql.connector.connect(
         host = host,
         user = user,
         password = password,
-        database = databaseSubmission #change?
+        database = databaseExclusion 
     )
 
     cursor = conn.cursor()
@@ -77,7 +76,7 @@ def doThing():
                     for upc in UPCs:
                         print(f"Found UPC: {upc}")
                         try:
-                            thing(submissionID, upc)
+                            insertToTable(submissionID, upc)
                         except mysql.connector.IntegrityError:
                             print(mysql.connector.IntegrityError)
                             writer.writerow([submissionNumber, submissionID, itemFile, "Already Exists in Table"])
