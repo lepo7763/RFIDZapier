@@ -8,6 +8,7 @@ from mysql.connector import pooling, IntegrityError
 # actively take new submissions for exclusion (excluded upcs) and add them
 
 # kept prints for debugging, but replaced with logging.info()
+
 load_dotenv(r"C:\Users\Ranfe\Music\RFIDZapier\.env") # TODO: change to C:\programdata
 
 HOST      = os.getenv("MYSQL_HOST")
@@ -45,7 +46,7 @@ def mainFunction():
     dayDate = currentDate.strftime("%Y-%m-%d")
     timeDate = currentDate.strftime("%H-%M-%S")
 
-    with open(f"Unsuccessful Exclusion Rows/{dayDate} at {timeDate}.csv", "w", newline='') as csvfile: # write unsuccessful rows to a CSV file
+    with open(fr"C:\Users\Ranfe\Music\RFIDZapier\Unsuccessful Exclusion Rows\{dayDate} at {timeDate}.csv", "w", newline='') as csvfile: # write unsuccessful rows to a CSV file
         writer = csv.writer(csvfile)
         writer.writerow(["Submission Number", "Submission ID", "itemFile", "Error"])
 
@@ -93,9 +94,7 @@ def mainFunction():
                 writer.writerow([submissionNumber, submissionID, itemFile, "Failed to Retrieve UPC Value(s)"])
 
             exclusionSaveLastSeen(submissionNumber + 1) # if script crashes, this saves where it left off. 
-    logging.info(f"""------------------------------------------------------------\n
-                     Finished Exclusion for {dayDate} at {timeDate}\n
-                     ------------------------------------------------------------\n\n\n""")
+    logging.info(f"""\n\n\n------------------------------------------------------------\nFinished Exclusion for {dayDate} at {timeDate}\n------------------------------------------------------------\n\n\n""")
     # print(f"Finished Exclusion for {dayDate} at {timeDate}")
     
 if __name__ == "__main__":

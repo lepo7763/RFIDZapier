@@ -4,8 +4,6 @@ from parser import isValidSubmissionCSV
 from downloader import retrieveUPC
 # Searches from september to present day for any missing UPC/GTIN values in submission
 
-# change structure to hashmap
-
 
 # 163650 (before running)
 # 164380 (after running for september)

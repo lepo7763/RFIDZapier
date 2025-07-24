@@ -1,7 +1,9 @@
-import csv, io, requests, re
+import csv, io, requests, re, logging
 
 # retrieve the UPC
 # download the csv file
+
+# kept prints for debugging, but replaced with logging.info()
 
 def retrieveUPC(url):
     response = requests.get(url, timeout=10)
@@ -16,7 +18,8 @@ def retrieveUPC(url):
     try:  
         UPCColumn = header.index("UPC") # get column location of UPC value
     except ValueError:
-        print("UPC column not present")
+        logging.info("UPC column not present")
+        # print("UPC column not present")
         return [], []
     
     UPCValues, badUPCs = [], []
@@ -26,7 +29,8 @@ def retrieveUPC(url):
 
         if "e" in rawValue.lower():
             badUPCs.append(rawValue)
-            print(f"Skipped invalid UPC: {rawValue}")
+            logging.info(f"Skipped invalid UPC: {rawValue}")
+            # print(f"Skipped invalid UPC: {rawValue}")
             continue
 
         cleanedValue = re.sub(r"[^0-9]", "", rawValue)

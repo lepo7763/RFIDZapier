@@ -26,7 +26,7 @@ def submissionsFunction():
     dayDate = currentDate.strftime("%Y-%m-%d")
     timeDate = currentDate.strftime("%H-%M-%S")
     
-    with open(f"Unsuccessful Submission Rows/{dayDate} at {timeDate}.csv", "w", newline='') as csvfile:
+    with open(fr"C:\Users\Ranfe\Music\RFIDZapier\Unsuccessful Submission Rows\{dayDate} at {timeDate}.csv", "w", newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(["Submission Number", "Submission ID", "itemFile", "Error"]) 
 
@@ -89,9 +89,7 @@ def submissionsFunction():
                 writer.writerow([submissionNumber, f"{submissionID}", itemFile, "Failed to Retrieve UPC Value(s)"])
 
             submissionSaveLastSeen(int(submissionNumber) + 1)  # Save progress in case of crash
-    logging.info(f"""------------------------------------------------------------\n
-                     Finished Submissions for {dayDate} at {timeDate}\n
-                     ------------------------------------------------------------\n\n\n""")
+    logging.info(f"""\n\n\n------------------------------------------------------------\nFinished Submissions for {dayDate} at {timeDate}\n------------------------------------------------------------\n\n\n""")
     # print(f"Finished Submissions for {dayDate} at {timeDate}")
 
 

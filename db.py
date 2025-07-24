@@ -47,14 +47,14 @@ def getLatestExclusionSubmissionNumber():
 
 def exclusionLoadLastSeen():
     try: 
-        with open("exclusion_last_seen.txt", "r") as f:
+        with open(r"C:\Users\Ranfe\Music\RFIDZapier\exclusion_last_seen.txt", "r") as f:
             return int(f.read().strip())
         
     except FileNotFoundError:
         return 0
     
 def exclusionSaveLastSeen(number):
-    with open("exclusion_last_seen.txt", "w") as f:
+    with open(r"C:\Users\Ranfe\Music\RFIDZapier\exclusion_last_seen.txt", "w") as f:
         f.write(str(number))
 
 
@@ -84,13 +84,13 @@ def getLatestSubmissionSubmissionNumber():
 
 def submissionLoadLastSeen():
     try: 
-        with open("submission_last_seen.txt", "r") as f:
+        with open(r"C:\Users\Ranfe\Music\RFIDZapier\submission_last_seen.txt", "r") as f:
             return int(f.read().strip())
         
     except FileNotFoundError:
         return 0
 
 def submissionSaveLastSeen(number):
-    with open("submission_last_seen.txt", "w") as f:
+    with open(r"C:\Users\Ranfe\Music\RFIDZapier\submission_last_seen.txt", "w") as f:
         f.write(str(number))
     

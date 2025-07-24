@@ -1,10 +1,11 @@
 """
 ------------------------
 Key changes (Optimized version of loadOldSubmissionValues.py)
-1. One shared MySQL connection‑pool (no connect‑per‑row).
+1. One shared MySQL connection-pool (no connect-per-row).
 2. Batch INSERT with INSERT IGNORE + executemany().
-3. Re‑use a prepared statement for speed.
+3. Re-use a prepared statement for speed.
 """
+
 import csv
 import datetime as dt
 import os
