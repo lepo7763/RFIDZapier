@@ -9,6 +9,7 @@ sleepSeconds = 43200 # 12 hours (43200) when running on server
 """REMEMBER TO CHANGE DIRECTORIES TO PROGRAMDATA
    DIRECTORIES ARE IN DB / HERE / SUBMISSIONS / MAIN
    SEARCH FOR SOMETHING LIKE R"C:" OR FR OR F """
+
 class myDaemon(win32serviceutil.ServiceFramework):
     _svc_name_ = "myDaemon"
     _svc_display_name_ = "My Python Daemon"
@@ -78,6 +79,7 @@ class myDaemon(win32serviceutil.ServiceFramework):
                 submissionsFunction()
             except Exception:
                 logging.exception("Submissions crashed")
+            logging.info(f"\n-------------------------------------------------\nService ran at {now}. Will run again in 12 hours...\n-------------------------------------------------n")
 
         runCycle() # runs instantly when the daemon is called
         while True:

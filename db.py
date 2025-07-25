@@ -36,7 +36,7 @@ def getExclusionRows(start, end):
 
 def insertExcludedUPCToSQL(submissionID, UPC):
     with POOL.get_connection() as conn, conn.cursor() as cursor:
-        cursor.execute("INSERT INTO alec_site.excluded_upc (submission_id, upc) VALUES (%s, %s)", (submissionID, UPC))
+        cursor.execute("INSERT INTO alec_site.excluded_upc (submission_id, upc, technical) VALUES (%s, %s, 1)", (submissionID, UPC))
 
 def getLatestExclusionSubmissionNumber():
     with POOL.get_connection() as conn, conn.cursor() as cursor:
