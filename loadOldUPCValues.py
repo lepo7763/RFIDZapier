@@ -6,25 +6,27 @@ from parser import isValidExclusionCSV
 from downloader import retrieveUPC
 import csv, datetime
 
-# searches from september to present day for any UPCs missing from table in alec_site exclusion
+# change months before running 
+# searches each month for any UPCs missing from table in alec_site exclusion
 
+# No pooling since load isn't as big
 
 load_dotenv()
 
-host = os.getenv("MYSQL_HOST")
-user = os.getenv("MYSQL_USER")
-password = os.getenv("MYSQL_PASSWORD")
-databaseExclusion = os.getenv("MYSQL_DATABASE_EXCLUSION")
+HOST = os.getenv("MYSQL_HOST")
+USER = os.getenv("MYSQL_USER")
+PASSWORD = os.getenv("MYSQL_PASSWORD")
+DB = os.getenv("MYSQL_DATABASE")
 
 def getRows():
     conn = mysql.connector.connect(
-        host = host,
-        user = user,
-        password = password,
-        database = databaseExclusion # change?
+        host = HOST,
+        user = USER,
+        password = PASSWORD,
+        database = DB 
     )
-
     cursor = conn.cursor()
+
     cursor.execute("""SELECT submission_id, submission_number, item_file
                    FROM alec_site.exclusion
                    WHERE submission_date
@@ -38,15 +40,16 @@ def getRows():
 
 def insertToTable(submissionID, UPC):
     conn = mysql.connector.connect(
-        host = host,
-        user = user,
-        password = password,
-        database = databaseExclusion 
+        host = HOST,
+        user = USER,
+        password = PASSWORD,
+        database = DB 
     )
-
     cursor = conn.cursor()
+
     cursor.execute("INSERT INTO alec_site.exclusion_upc_list (submission_id, upc) VALUES (%s, %s)", (submissionID, UPC))
     conn.commit()
+
     cursor.close()
     conn.close()
 
@@ -80,6 +83,8 @@ def doThing():
                         except mysql.connector.IntegrityError:
                             print(mysql.connector.IntegrityError)
                             writer.writerow([submissionNumber, submissionID, itemFile, "Already Exists in Table"])
+
+                    # Logging invalid UPC values
                     for bad in badUPCs:
                         writer.writerow([submissionNumber, submissionID, itemFile, f"Bad UPC Value - {bad}"])
                 

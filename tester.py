@@ -68,7 +68,7 @@ def insert_upcs(batch):
     cur.close()
     conn.close()
     batch.clear()
-    print("!!! pushed 500 into db!!!")
+    print("!!! pushed 1000 into db !!!")
 
 
 def checkSQL(submissionID, value): #check for duplicates in the sql db
@@ -128,7 +128,7 @@ def main():
 
                 if upcs:
                     if not checkSQL(sub_id, gtin):
-                        batch.append(sub_id, gtin)
+                        batch.append((sub_id, gtin))
                     for upc in upcs:
                         print(f"Found UPC: {upc}")
                         if not checkSQL(sub_id, upc):
