@@ -34,6 +34,8 @@ Use the two SQL queries below to get the latest exclusion/submission numbers
 - SELECT MAX(submission_number) FROM the exclusion table (Exclusion)
 - SELECT MAX(submission) FROM the general_form_subs table (Submissions)
 
+3. Change the ```load_dotenv(r"C:\....")``` to your specific directory. These are located in the files: ```main.py and db.py``` .
+    
 ### 4) Starting the daemon
 The daemon is defined in daemonRunner.py. Run these commands in an elevated PowerShell (Run as Administrator)
 
