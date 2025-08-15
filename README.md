@@ -34,7 +34,8 @@ Use the two SQL queries below to get the latest exclusion/submission numbers
 - SELECT MAX(submission_number) FROM the exclusion table (Exclusion)
 - SELECT MAX(submission) FROM the general_form_subs table (Submissions)
 
-3. Change the ```load_dotenv(r"C:\....")``` to your specific directory. These are located in the files: ```main.py and db.py``` .
+3. Change the ```load_dotenv(r"C:\....")``` and ```fr"C:\..."``` directories that point to folders or anything else to your specific directory. These are located in the files: ```main.py, submissions.py, and db.py``` .
+(It could be easier if you did the find function (ctrl + f) and searched for "Ranfe" in each of these files)
     
 ### 4) Starting the daemon
 The daemon is defined in daemonRunner.py. Run these commands in an elevated PowerShell (Run as Administrator)
