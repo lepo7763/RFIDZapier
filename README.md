@@ -19,7 +19,7 @@ A Python daemon that runs the **Exclusions** and **Submissions** jobs on a 12 ho
 - ./Unsuccessful Submission Rows/
 - ./Load old submission values outputs/
 
-### 3) Add a .env file and last_seen files
+### 3) Add a .env file, add (or adjust using the loadold...py files to get up-to-date) the last_seen file, and adjust the load_dotenv file paths to your specific .env directory
 1. Create a .env file with your db credentials for mysql connector to use:
 (remember to add .env to .gitignore)
 
